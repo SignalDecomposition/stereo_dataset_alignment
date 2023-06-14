@@ -1,7 +1,7 @@
 % Load stereo images
-i = 80
-leftImage = imread(sprintf('img_%d_L.png',i));
-rightImage = imread(sprintf('img_%d_R.png',i));
+i = 52
+leftImage = imread(fullfile("Eldar_photos_seperated",sprintf('img_%d_L.png',i)));
+rightImage = imread(fullfile("Eldar_photos_seperated",sprintf('img_%d_R.png',i)));
 [m,n,~] = size(leftImage);
 rightImage = rightImage(1:m,1:n,:);
 
@@ -9,7 +9,7 @@ figure;
 subplot(1,2,1);imshow(leftImage);title("left")
 subplot(1,2,2);imshow(rightImage);title("right")
 
-corp_pixels = 20;
+corp_pixels = 25;
 leftImage = leftImage(:,1:n-corp_pixels,:);
 rightImage = rightImage(1:m,1+corp_pixels:n,:);
 
@@ -31,9 +31,7 @@ ptsDistorted =  detectSURFFeatures(rightImage_gray);
 %Match features by using their descriptors.
 indexPairs = matchFeatures(featuresOriginal,featuresDistorted);
 
-%Match features by using their descriptors.
 
-indexPairs = matchFeatures(featuresOriginal,featuresDistorted);
 %Retrieve locations of corresponding points for each image.
 
 matchedOriginal = validPtsOriginal(indexPairs(:,1));
@@ -46,7 +44,7 @@ title('Putatively matched points (including outliers)');
 
 %% Step 4: Estimate Transformation
 
-[tform, inlierIdx] = estgeotform2d(matchedDistorted,matchedOriginal,'similarity');
+[tform, inlierIdx] = estgeotform2d(matchedDistorted,matchedOriginal,'affine');
 inlierDistorted = matchedDistorted(inlierIdx,:);
 inlierOriginal = matchedOriginal(inlierIdx,:);
 %Display matching point pairs used in the computation of the transformation.
@@ -70,8 +68,8 @@ disp(['Recovered scale: ', num2str(scaleRecovered)])
 thetaRecovered = atan2d(-ss,sc);
 disp(['Recovered theta: ', num2str(thetaRecovered)])
 
-disp(['Scale: ' num2str(invTform.Scale)])
-disp(['RotationAngle: ' num2str(invTform.RotationAngle)])
+%disp(['Scale: ' num2str(invTform.Scale)])
+%disp(['RotationAngle: ' num2str(invTform.RotationAngle)])
 
 %% Step 6: Recover the Original Image
 
@@ -90,7 +88,7 @@ disp(['RotationAngle: ' num2str(invTform.RotationAngle)])
 
 % applay on the image Rotation 
 
-recovered = imrotate(rightImage,invTform.RotationAngle,'bilinear','crop');
+recovered = imrotate(rightImage,thetaRecovered,'bilinear','crop');
 figure, imshowpair(leftImage,recovered,'montage')
 figure;
 imshow(recovered); 
@@ -127,7 +125,7 @@ showMatchedFeatures(leftImage,recovered,matchedOriginal,matchedDistorted);
 title('Putatively matched points after rotation');
 
 
-[tform, inlierIdx] = estgeotform2d(matchedDistorted,matchedOriginal,'similarity');
+[tform, inlierIdx] = estgeotform2d(matchedDistorted,matchedOriginal,'affine');
 inlierDistorted = matchedDistorted(inlierIdx,:);
 inlierOriginal = matchedOriginal(inlierIdx,:);
 %Display matching point pairs used in the computation of the transformation.
