@@ -1,10 +1,10 @@
-function [leftImage_out,rightImage_out] = aligenR2L(leftImage,rightImage)
+function [leftImage_out,rightImage_out] = aligenR2L(leftImage,rightImage,corp_pixels)
 
 %Resize the right image to the size of the left image 
 [m,n,~] = size(leftImage);
 
 %Clear the edges of the sensor noise 
-corp_pixels = 20;
+corp_pixels = corp_pixels;
 leftImage = leftImage(:,1:n-corp_pixels,:);
 rightImage = rightImage(1:m,1+corp_pixels:n,:);
 
@@ -23,9 +23,6 @@ ptsDistorted =  detectSURFFeatures(rightImage_gray);
 %Match features by using their descriptors.
 indexPairs = matchFeatures(featuresOriginal,featuresDistorted);
 
-%Match features by using their descriptors.
-
-indexPairs = matchFeatures(featuresOriginal,featuresDistorted);
 %Retrieve locations of corresponding points for each image.
 
 matchedOriginal = validPtsOriginal(indexPairs(:,1));
